@@ -16,4 +16,4 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now)
 
-    role = relationship("Role", back_populates="users")
+    role = relationship("Role")

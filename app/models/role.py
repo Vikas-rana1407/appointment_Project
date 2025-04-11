@@ -6,7 +6,7 @@ class Role(Base):
     __tablename__ = "roles"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique= True, nullable=False)
+    role_name = Column(String, unique= True, nullable=False)
     description = Column(String)
 
     users = relationship("User", back_populates="role")
