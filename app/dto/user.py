@@ -16,3 +16,9 @@ class Userout(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserUpdate(BaseModel):
+    fullname: Optional[str]
+    mobile_number: Optional[str]
+    email : Optional[EmailStr]
+    password: Optional[str]

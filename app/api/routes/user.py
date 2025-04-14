@@ -1,81 +1,48 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List
 import logging
+from typing import List
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
 
-from app.models.user import User
-from app.dto.user import Userout, UserCreate
 from app.core.database import get_db
 from app.core.auth import get_current_user
-from sqlalchemy.exc import SQLAlchemyError
+from app.dto.user import UserUpdate, Userout
+from app.models.user import User
+from app.services.user_service import delete_user, get_all_users, get_user_by_id, update_user
 
 log = logging.getLogger(__name__)
 router = APIRouter()
 
-#Get current logged-in user
+# Get current user
 @router.get("/me", response_model=Userout)
 def read_current_user(current_user: User = Depends(get_current_user)):
+    
+    log.info(f"Current user accessed: {current_user.email}")
     return current_user
 
-#Get all users
+# Get all users
 @router.get("/users", response_model=List[Userout])
-def get_all_users(db: Session = Depends(get_db)):
-    try:
-        users = db.query(User).all()
-        log.info("Fetched all users")
-        return users
-    except SQLAlchemyError:
-        log.exception("Error fetching all users")
-        raise HTTPException(status_code=500, detail="Database error")
+def get_all_users_route(db: Session = Depends(get_db)):
 
-#Get a specific user by ID
-@router.get("/{user_id}", response_model=Userout)
-def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        return user
-    except SQLAlchemyError:
-        log.exception("Error fetching user by ID")
-        raise HTTPException(status_code=500, detail="Database error")
+    log.info("Fetching all users")
+    return get_all_users(db)
 
-# Update a user by ID
-@router.put("/{user_id}", response_model=Userout)
-def update_user(user_id: int, user_in: UserCreate, db: Session = Depends(get_db)):
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+#Get user by ID
+@router.get("/users/{user_id}", response_model=Userout)
+def read_user_by_id(user_id: int, db: Session = Depends(get_db)):
+ 
+    log.info(f"Fetching user with ID: {user_id}")
+    return get_user_by_id(user_id, db)
 
-        user.fullname = user_in.fullname
-        user.email = user_in.email
-        user.mobile_number = user_in.mobile_number
-        user.password = user.password  # Assume password is already hashed if needed
-        user.role_id = user_in.role_id
+#Update user information
+@router.put("/users/{user_id}", response_model=Userout)
+def update_user_info(user_id: int, user_in: UserUpdate, db: Session = Depends(get_db)):
+   
+    log.info(f"Updating user with ID: {user_id}")
+    return update_user(user_id, user_in, db)
 
-        db.commit()
-        db.refresh(user)
-        log.info(f"Updated user: {user.email}")
-        return user
-    except SQLAlchemyError:
-        log.exception("Error updating user")
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Database error")
-
-# Delete a user by ID
-@router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        db.delete(user)
-        db.commit()
-        log.info(f"Deleted user with ID: {user_id}")
-        return {"detail": "User deleted successfully"}
-    except SQLAlchemyError:
-        log.exception("Error deleting user")
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Database error")
+#Delete user account
+@router.delete("/users/{user_id}", status_code=status.HTTP_200_OK)
+def delete_user_account(user_id: int, db: Session = Depends(get_db)):
+    
+    log.info(f"Deleting user with ID: {user_id}")
+    return delete_user(user_id, db)
