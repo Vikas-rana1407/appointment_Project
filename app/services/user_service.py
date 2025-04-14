@@ -39,10 +39,8 @@ def register_user(db: Session, user_in: UserCreate) -> User:
         db.rollback()
         logger.error(f"Database error: {e}")
         raise HTTPException(status_code=500, detail="Database error")
-    except HTTPException as e:
-        raise e
-    except Exception:
-        logger.exception("Unexpected error during registration")
+    except Exception as e:
+        logger.exception(f"Unexpected error during registration: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
@@ -60,13 +58,11 @@ def login_user(db: Session, request: LoginRequest) -> TokenResponse:
         logger.info(f"User logged in: {user.email}")
         return TokenResponse(access_token=token, token_type="bearer")
 
-    except SQLAlchemyError:
-        logger.exception("Database error during login")
+    except SQLAlchemyError as e:
+        logger.exception(f"Database error during login : {e}")
         raise HTTPException(status_code=500, detail="Database error")
-    except HTTPException:
-        raise
-    except Exception:
-        logger.exception("Unexpected error during login")
+    except Exception as e:
+        logger.exception(f"Unexpected error during login : {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
@@ -75,8 +71,8 @@ def get_all_users(db: Session) -> List[User]:
         users = db.query(User).all()
         logger.info("Fetched all users")
         return users
-    except SQLAlchemyError:
-        logger.exception("Database error while fetching all users")
+    except SQLAlchemyError as e:
+        logger.exception(f"Database error while fetching all users: {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
 
@@ -87,8 +83,8 @@ def get_user_by_id(user_id: int, db: Session) -> User:
             logger.warning(f"User not found with ID: {user_id}")
             raise HTTPException(status_code=404, detail="User not found")
         return user
-    except SQLAlchemyError:
-        logger.exception("Database error while fetching user by ID")
+    except SQLAlchemyError as e:
+        logger.exception("Database error while fetching user by ID : {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
 
@@ -119,9 +115,9 @@ def update_user(user_id: int, user_in: UserUpdate, db: Session) -> User:
         logger.info(f"User updated successfully: {user.email}")
         return user
 
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         db.rollback()
-        logger.exception("Database error while updating user")
+        logger.exception(f"Database error while updating user : {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
 
@@ -137,7 +133,7 @@ def delete_user(user_id: int, db: Session):
         logger.info(f"User deleted: {user.email}")
         return {"message": "User deleted successfully"}
 
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         db.rollback()
-        logger.exception("Database error while deleting user")
+        logger.exception(f"Database error while deleting user : {e}")
         raise HTTPException(status_code=500, detail="Database error")
