@@ -10,7 +10,7 @@ class Provider(Base):
     name = Column(String, nullable=False)
     pan = Column(String)
     organisation_id = Column(Integer, ForeignKey("organisations.id"))
-    bio = Column(Text)
+    bio = Column(String)
     created_at = Column(Date)
 
     users = relationship("User", back_populates="role") # A provider *is* a user

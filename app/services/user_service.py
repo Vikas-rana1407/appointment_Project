@@ -35,12 +35,12 @@ def register_user(db: Session, user_in: UserCreate) -> User:
         logger.info(f"New user registered: {new_user.email}")
         return new_user
 
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         db.rollback()
-        logger.exception("Database error during registration")
+        logger.error(f"Database error: {e}")
         raise HTTPException(status_code=500, detail="Database error")
-    except HTTPException:
-        raise
+    except HTTPException as e:
+        raise e
     except Exception:
         logger.exception("Unexpected error during registration")
         raise HTTPException(status_code=500, detail="Internal Server Error")

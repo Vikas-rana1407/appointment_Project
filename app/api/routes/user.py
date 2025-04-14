@@ -20,28 +20,28 @@ def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
 
 # Get all users
-@router.get("/users", response_model=List[Userout])
+@router.get("/", response_model=List[Userout])
 def get_all_users_route(db: Session = Depends(get_db)):
 
     log.info("Fetching all users")
     return get_all_users(db)
 
 #Get user by ID
-@router.get("/users/{user_id}", response_model=Userout)
+@router.get("/{user_id}", response_model=Userout)
 def read_user_by_id(user_id: int, db: Session = Depends(get_db)):
  
     log.info(f"Fetching user with ID: {user_id}")
     return get_user_by_id(user_id, db)
 
 #Update user information
-@router.put("/users/{user_id}", response_model=Userout)
+@router.put("/{user_id}", response_model=Userout)
 def update_user_info(user_id: int, user_in: UserUpdate, db: Session = Depends(get_db)):
    
     log.info(f"Updating user with ID: {user_id}")
     return update_user(user_id, user_in, db)
 
 #Delete user account
-@router.delete("/users/{user_id}", status_code=status.HTTP_200_OK)
+@router.delete("/{user_id}", status_code=status.HTTP_200_OK)
 def delete_user_account(user_id: int, db: Session = Depends(get_db)):
     
     log.info(f"Deleting user with ID: {user_id}")
