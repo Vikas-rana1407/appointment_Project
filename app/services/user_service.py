@@ -43,7 +43,7 @@ def register_user(db: Session, user_in: UserCreate) -> User:
         logger.exception(f"Unexpected error during registration: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-
+#user login
 def login_user(db: Session, request: LoginRequest) -> TokenResponse:
     try:
         user = db.query(User).filter(User.email == request.email).first()
@@ -65,7 +65,7 @@ def login_user(db: Session, request: LoginRequest) -> TokenResponse:
         logger.exception(f"Unexpected error during login : {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-
+#get all users
 def get_all_users(db: Session) -> List[User]:
     try:
         users = db.query(User).all()
@@ -75,7 +75,7 @@ def get_all_users(db: Session) -> List[User]:
         logger.exception(f"Database error while fetching all users: {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
-
+#get user by ID
 def get_user_by_id(user_id: int, db: Session) -> User:
     try:
         user = db.query(User).filter(User.id == user_id).first()
@@ -87,7 +87,7 @@ def get_user_by_id(user_id: int, db: Session) -> User:
         logger.exception("Database error while fetching user by ID : {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
-
+#update user
 def update_user(user_id: int, user_in: UserUpdate, db: Session) -> User:
     try:
         user = db.query(User).filter(User.id == user_id).first()
@@ -120,7 +120,7 @@ def update_user(user_id: int, user_in: UserUpdate, db: Session) -> User:
         logger.exception(f"Database error while updating user : {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
-
+#delete user
 def delete_user(user_id: int, db: Session):
     try:
         user = db.query(User).filter(User.id == user_id).first()

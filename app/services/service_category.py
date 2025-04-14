@@ -7,6 +7,7 @@ import logging
  
 log = logging.getLogger(__name__)
  
+ #create service category
 def create_service_categories(db: Session, service_in: service_category_create):
     existing = db.query(ServiceCategory).filter(ServiceCategory.category_name == service_in.category_name).first()
     if existing:
@@ -27,7 +28,8 @@ def create_service_categories(db: Session, service_in: service_category_create):
         db.rollback()
         log.error(f"Error creating service category: {e}")
         raise HTTPException(status_code=500, detail="Database error")
- 
+
+#get service category
 def read_service_categories(db: Session):
     try:
         categories = db.query(ServiceCategory).all()
@@ -37,21 +39,7 @@ def read_service_categories(db: Session):
         log.error(f"Error fetching service categories: {e}")
         raise HTTPException(status_code=500, detail="Database error")
  
-def delete_service_categories(id: int, db: Session):
-    try:
-        category = db.query(ServiceCategory).filter(ServiceCategory.id == id).first()
-        if not category:
-            raise HTTPException(status_code=404, detail="Service category not found")
- 
-        db.delete(category)
-        db.commit()
-        log.info(f"Deleted service category with ID: {id}")
-        return {"message": f"Service category with ID {id} deleted successfully"}
-    except SQLAlchemyError as e:
-        db.rollback()
-        log.error(f"Error deleting service category: {e}")
-        raise HTTPException(status_code=500, detail="Database error")
- 
+#update service category
 def update_service_categories(id: int, service_in: service_category_create, db: Session):
     try:
         category = db.query(ServiceCategory).filter(ServiceCategory.id == id).first()
@@ -65,7 +53,8 @@ def update_service_categories(id: int, service_in: service_category_create, db: 
  
         category.category_name = service_in.category_name
         category.description = service_in.description
- 
+
+        db.add(category)
         db.commit()
         db.refresh(category)
         log.info(f"Updated service category with ID: {id}")
@@ -73,4 +62,20 @@ def update_service_categories(id: int, service_in: service_category_create, db: 
     except SQLAlchemyError as e:
         db.rollback()
         log.error(f"Error updating service category: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+#delete service category
+def delete_service_categories(id: int, db: Session):
+    try:
+        category = db.query(ServiceCategory).filter(ServiceCategory.id == id).first()
+        if not category:
+            raise HTTPException(status_code=404, detail="Service category not found")
+ 
+        db.delete(category)
+        db.commit()
+        log.info(f"Deleted service category with ID: {id}")
+        return {"message": f"Service category with ID {id} deleted successfully"}
+    except SQLAlchemyError as e:
+        db.rollback()
+        log.error(f"Error deleting service category: {e}")
         raise HTTPException(status_code=500, detail="Database error")
