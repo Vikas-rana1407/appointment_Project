@@ -22,13 +22,13 @@ def read_all_service_category(db: Session = Depends(get_db)):
     return read_service_categories(db)
  
 # update service category
-@router.put("/", response_model=service_category_out)
+@router.put("/{id}", response_model=service_category_out)
 def update_service_category(id: int, service_in: service_category_create, db: Session = Depends(get_db)):
     log.info(f"Updating service category with ID: {id}")
     return update_service_categories(id, service_in, db)
  
 # delete service category
-@router.delete("/")
+@router.delete("/{id}")
 def delete_service_category(id: int, db: Session = Depends(get_db)):
     log.info(f"Deleting service category with ID: {id}")
     return delete_service_categories(id, db)

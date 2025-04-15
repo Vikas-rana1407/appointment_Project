@@ -10,7 +10,7 @@ from app.dto.auth import LoginRequest, TokenResponse
 
 logger = logging.getLogger(__name__)
 
-
+# register user
 def register_user(db: Session, user_in: UserCreate) -> User:
     try:
         # Check for existing user by email
@@ -39,20 +39,26 @@ def register_user(db: Session, user_in: UserCreate) -> User:
         db.rollback()
         logger.error(f"Database error: {e}")
         raise HTTPException(status_code=500, detail="Database error")
-    except Exception as e:
-        logger.exception(f"Unexpected error during registration: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    # except Exception as e:
+    #     logger.exception(f"Unexpected error during registration: {e}")
+    #     raise HTTPException(status_code=500, detail="Internal Server Error")
 
 #user login
 def login_user(db: Session, request: LoginRequest) -> TokenResponse:
     try:
         user = db.query(User).filter(User.email == request.email).first()
-        if not user or not verify_password(request.password, user.password):
-            logger.warning(f"Login failed for email: {request.email}")
+        if not user:
+            logger.warning(f"User not found for email: {request.email}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password"
             )
+
+        if not verify_password(request.password, user.password):
+            logger.warning(f"Password mismatch for email: {request.email}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password")
 
         token = create_access_token(data={"sub": user.email})
         logger.info(f"User logged in: {user.email}")
@@ -61,9 +67,9 @@ def login_user(db: Session, request: LoginRequest) -> TokenResponse:
     except SQLAlchemyError as e:
         logger.exception(f"Database error during login : {e}")
         raise HTTPException(status_code=500, detail="Database error")
-    except Exception as e:
-        logger.exception(f"Unexpected error during login : {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    # except Exception as e:
+    #     logger.exception(f"Unexpected error during login : {e}")
+    #     raise HTTPException(status_code=500, detail="Internal Server Error")
 
 #get all users
 def get_all_users(db: Session) -> List[User]:

@@ -1,7 +1,9 @@
+from fastapi import HTTPException, status
 from passlib.context import CryptContext
-from jose import jwt
+from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
 from app.core.config import settings
+import logging
 
 # For hashing passwords
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,10 +23,10 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     return encoded_jwt
 
 
-def decode_access_token(token: str):
-    try:
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-        return payload
-    except jwt.JWTError:
-        return None
-
+# def decode_access_token(token: str):
+#     try:
+#         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+#         return payload
+#     except JWTError as e:
+#         logging.error(f"JWT decoding error: {e}")
+#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")

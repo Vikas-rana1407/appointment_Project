@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 bearer_scheme = HTTPBearer()
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-    db: Session = Depends(get_db)
-) -> User:
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),db: Session = Depends(get_db)) -> User:
     token = credentials.credentials
     return get_current_user_from_token(token, db)
 
@@ -32,12 +30,12 @@ def get_current_user_from_token(token: str, db: Session) -> User:
     except ExpiredSignatureError:
         logger.warning("Token has expired")
         raise HTTPException(status_code=401, detail="Token has expired")
-    except JWTError as e:
-        logger.error(f"JWT decode failed: {str(e)}")
+    except JWTError:
+        logger.error(f"JWT decode failed")
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     except Exception as e:
-        logger.exception("Unexpected error during token validation")
-        raise HTTPException(status_code=500, detail="Internal server error during authentication")
+        logger.exception(f"Unexpected error during token validation :{e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error during authentication : {e}")
 
     user = db.query(User).filter(User.email == email).first()
     if user is None:

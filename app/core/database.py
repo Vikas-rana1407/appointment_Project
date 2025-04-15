@@ -12,7 +12,7 @@ try:
     logger.info("Database engine created successfully.")
 except Exception as e:
     logger.error(f"Failed to create database engine: {e}")
-    raise
+    raise 
 
 # Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -27,7 +27,7 @@ def get_db():
         yield db
     except Exception as e:
         logger.error(f"Database session error: {e}")
-        raise
+        raise 
     finally:
         db.close()
         

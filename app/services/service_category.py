@@ -9,13 +9,13 @@ log = logging.getLogger(__name__)
  
  #create service category
 def create_service_categories(db: Session, service_in: service_category_create):
-    existing = db.query(ServiceCategory).filter(ServiceCategory.category_name == service_in.category_name).first()
+    existing = db.query(ServiceCategory).filter(ServiceCategory.category_name == service_in.category_name.lower()).first()
     if existing:
         log.warning("Category name already registered.")
         raise HTTPException(status_code=400, detail="Category name already registered")
  
     new_service = ServiceCategory(
-        category_name=service_in.category_name,
+        category_name=service_in.category_name.lower(),
         description=service_in.description
     )
     try:
@@ -54,7 +54,6 @@ def update_service_categories(id: int, service_in: service_category_create, db: 
         category.category_name = service_in.category_name
         category.description = service_in.description
 
-        db.add(category)
         db.commit()
         db.refresh(category)
         log.info(f"Updated service category with ID: {id}")

@@ -2,7 +2,6 @@ import logging
 from typing import List
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-
 from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.dto.user import UserUpdate, Userout
@@ -18,6 +17,14 @@ def read_current_user(current_user: User = Depends(get_current_user)):
     
     log.info(f"Current user accessed: {current_user.email}")
     return current_user
+
+#Update current user profile
+@router.put("/me", response_model=Userout)
+def update_my_profile(user_in: UserUpdate,db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
+    
+    log.info(f"Updating profile for user: {current_user.email}")
+    return update_user(current_user.id, user_in, db)
+
 
 # Get all users
 @router.get("/", response_model=List[Userout])
